@@ -1,0 +1,7 @@
+.idea
+*.exe
+*.sql
+go.mod
+go.sum
+ipdata.txt
+data.db
