@@ -4,3 +4,4 @@
 *.db
 go.mod
 go.sum
+ipcheck

@@ -22,10 +22,10 @@ func Ping(c *gin.Context) {
 		tools.GetResType(rType, &res, c)
 		return
 	}
-	val, err := tools.RedisGet("ping:" + pingFlag)
+	val, err := tools.RedisGet(pType + pingFlag)
 	if err != nil || uType != "yes" {
 		pingRes, _ := tools.ExecCommand(pType, []string{"-c", "4", pingFlag})
-		_ = tools.RedisSet("ping:"+pingFlag, pingRes, 60)
+		_ = tools.RedisSet(pType+pingFlag, pingRes, 60)
 		res.Data = pingRes
 	} else {
 		res.Data = val

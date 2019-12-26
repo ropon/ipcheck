@@ -23,10 +23,10 @@ func Curl(c *gin.Context) {
 		tools.GetResType(rType, &res, c)
 		return
 	}
-	val, err := tools.RedisGet("curl:" + curlFlag)
+	val, err := tools.RedisGet(cType + curlFlag)
 	if err != nil || uType != "yes" {
 		curlRes, _ := tools.ExecCommand("curl", []string{cType, cStatus, curlFlag})
-		_ = tools.RedisSet("curl:"+curlFlag, curlRes, 60)
+		_ = tools.RedisSet(cType+curlFlag, curlRes, 60)
 		res.Data = curlRes
 	} else {
 		res.Data = val
