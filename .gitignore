@@ -1,7 +1,6 @@
 .idea
 *.exe
 *.sql
+*.db
 go.mod
 go.sum
-ipdata.txt
-data.db
