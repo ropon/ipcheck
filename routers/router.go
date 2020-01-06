@@ -6,7 +6,8 @@ import (
 )
 
 func InitRouter() *gin.Engine {
-	router := gin.Default()
+	router := gin.New()
+	gin.SetMode(gin.ReleaseMode)
 	apiV1 := router.Group("api/v1")
 	{
 		apiV1.GET("ping", v1.Ping)

@@ -5,6 +5,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/go-redis/redis"
 	"ipcheck/models"
+	"net"
 	"os/exec"
 	"time"
 )
@@ -12,9 +13,14 @@ import (
 //定义错误代码说明
 var CodeType = map[int]string{
 	4001: "参数不完整",
+	4002: "SecretKey无效",
 }
 
-var redisDb *redis.Client
+var (
+	redisDb   *redis.Client
+	SecretKey = "xxxxx"
+	DefaultIP = "127.0.0.1"
+)
 
 func init() {
 	redisDb = redis.NewClient(&redis.Options{
@@ -53,6 +59,19 @@ func CheckArg(args ...string) (err error) {
 		}
 	}
 	return
+}
+
+func GetDefaultIp(c *gin.Context) string {
+	remoteAddr := c.Request.RemoteAddr
+	if ip := c.Request.Header.Get("HTTP_X_FORWARDED_FOR"); ip != "" {
+		remoteAddr = ip
+	} else {
+		remoteAddr, _, _ = net.SplitHostPort(remoteAddr)
+	}
+	if remoteAddr == "::1" {
+		remoteAddr = "127.0.0.1"
+	}
+	return remoteAddr
 }
 
 func GetResType(rType string, res *models.Result, c *gin.Context) {

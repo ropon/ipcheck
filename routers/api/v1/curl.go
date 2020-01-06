@@ -9,12 +9,19 @@ import (
 func Curl(c *gin.Context) {
 	res := models.NewDefaultResult()
 	rType := c.DefaultQuery("type", "text")
-	cType := c.DefaultQuery("ctype", "-6")
-	cStatus := c.Query("cstatus")
+	defaultIP := tools.GetDefaultIp(c)
+	if defaultIP != tools.DefaultIP {
+		SecretKey := c.Query("SecretKey")
+		//SecretKey无效
+		if SecretKey != tools.SecretKey {
+			res.ErrCode = 4002
+			res.ErrMsg = tools.CodeType[res.ErrCode]
+			tools.GetResType(rType, &res, c)
+			return
+		}
+	}
 	//可以是域名或IPV4
-	curlFlag := c.Query("curlflag")
-	//默认读缓存
-	uType := c.DefaultQuery("cache", "yes")
+	curlFlag := c.Query("curlFlag")
 	err := tools.CheckArg(curlFlag)
 	//参数不完整
 	if err != nil {
@@ -23,10 +30,14 @@ func Curl(c *gin.Context) {
 		tools.GetResType(rType, &res, c)
 		return
 	}
-	val, err := tools.RedisGet(cType + curlFlag)
+	cType := c.DefaultQuery("cType", "-6")
+	cStatus := c.Query("cStatus")
+	//默认读缓存
+	uType := c.DefaultQuery("cache", "yes")
+	val, err := tools.RedisGet(cType + curlFlag + cStatus)
 	if err != nil || uType != "yes" {
 		curlRes, _ := tools.ExecCommand("curl", []string{cType, cStatus, curlFlag})
-		_ = tools.RedisSet(cType+curlFlag, curlRes, 60)
+		_ = tools.RedisSet(cType+curlFlag+cStatus, curlRes, 60)
 		res.Data = curlRes
 	} else {
 		res.Data = val
