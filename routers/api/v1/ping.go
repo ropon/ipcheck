@@ -30,6 +30,12 @@ func Ping(c *gin.Context) {
 		tools.GetResType(rType, &res, c)
 		return
 	}
+	if ! tools.CheckIpV4(pingFlag) && !tools.CheckIpV6(pingFlag) && !tools.CheckDomain(pingFlag) {
+		res.ErrCode = 4003
+		res.ErrMsg = tools.CodeType[res.ErrCode]
+		tools.GetResType(rType, &res, c)
+		return
+	}
 	pType := c.DefaultQuery("pType", "ping6")
 	//不是ping6就是ping
 	if pType != "ping6" {

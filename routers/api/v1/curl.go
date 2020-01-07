@@ -30,6 +30,12 @@ func Curl(c *gin.Context) {
 		tools.GetResType(rType, &res, c)
 		return
 	}
+	if ! tools.CheckIpV4(curlFlag) && !tools.CheckDomain(curlFlag) {
+		res.ErrCode = 4003
+		res.ErrMsg = tools.CodeType[res.ErrCode]
+		tools.GetResType(rType, &res, c)
+		return
+	}
 	cType := c.DefaultQuery("cType", "-6")
 	cStatus := c.Query("cStatus")
 	//默认读缓存

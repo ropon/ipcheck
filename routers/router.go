@@ -2,11 +2,16 @@ package routers
 
 import (
 	"github.com/gin-gonic/gin"
+	"io"
 	v1 "ipcheck/routers/api/v1"
+	"os"
 )
 
 func InitRouter() *gin.Engine {
-	router := gin.New()
+	gin.DisableConsoleColor()
+	f, _ := os.Create("./ipcheck.log")
+	gin.DefaultWriter = io.MultiWriter(f)
+	router := gin.Default()
 	gin.SetMode(gin.ReleaseMode)
 	apiV1 := router.Group("api/v1")
 	{

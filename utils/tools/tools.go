@@ -7,6 +7,8 @@ import (
 	"ipcheck/models"
 	"net"
 	"os/exec"
+	"regexp"
+	"strings"
 	"time"
 )
 
@@ -14,12 +16,14 @@ import (
 var CodeType = map[int]string{
 	4001: "参数不完整",
 	4002: "SecretKey无效",
+	4003: "IP或域名格式不正确",
 }
 
 var (
 	redisDb   *redis.Client
-	SecretKey = "xxxxx"
+	SecretKey = "*********"
 	DefaultIP = "127.0.0.1"
+	reg       = "^((xn--)?[A-Za-z0-9*]{1,100}\\.){1,8}((xn--)?[A-Za-z0-9]){1,24}$"
 )
 
 func init() {
@@ -61,6 +65,23 @@ func CheckArg(args ...string) (err error) {
 	return
 }
 
+func CheckIpV4(ipStr string) bool {
+	ip := net.ParseIP(ipStr)
+	if ip == nil || ip.To4() == nil {
+		return false
+	}
+	return true
+}
+
+func CheckIpV6(ipStr string) bool {
+	return strings.Count(ipStr, ":") >= 2
+}
+
+func CheckDomain(domainStr string) bool {
+	match, _ := regexp.MatchString(reg, domainStr)
+	return match
+}
+
 func GetDefaultIp(c *gin.Context) string {
 	remoteAddr := c.Request.RemoteAddr
 	if ip := c.Request.Header.Get("HTTP_X_FORWARDED_FOR"); ip != "" {
@@ -83,10 +104,11 @@ func GetResType(rType string, res *models.Result, c *gin.Context) {
 }
 
 func ExecCommand(commandName string, params []string, ) (res string, err error) {
-	stdout, err := exec.Command(commandName, params...).Output()
+	//返回标准输出和错误
+	out, err := exec.Command(commandName, params...).CombinedOutput()
 	if err != nil {
 		return
 	}
-	res = string(stdout)
+	res = string(out)
 	return
 }
